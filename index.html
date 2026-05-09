@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>STOCK GUDANG</title>
+  <style>
+    
+    body {
+      font-family: Arial, Sans-Serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0,1);
+    }
+    
+    h2 {
+      text-align: center;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 8px;
+      background: black;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    
+    th,td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    
+    th {
+      background: #eee;
+    }
+    
+    .hapus {
+      background: red;
+      color: white;
+      padding: 5px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .edit {
+      background: orange;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+      margin-top: 5px;
+    }
+    
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    <h2>Stock gudang</h2>
+    
+    <input type="text" id="namabarang"
+    placeholder="nama barang">
+    
+    <input type="number" id="jumlahbarang"
+    placeholder="jumlah barang">
+    
+    <button onclick="tambahbarang()">
+      tambah barang
+    </button>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>barang</th>
+          <th>jumlah</th>
+          <th>aksi</th>
+        </tr>
+      </thead>
+      
+      <tbody id="dataStock"></tbody>
+    </table>
+  </div>
+  
+  <script>
+    
+    let stock =
+    JSON.parse(localStorage.getItem("stockGudang")) || [];
+    
+    tampilkanData();
+    
+    function tambahbarang() {
+      let nama=
+      
+      document.getElementById("namabarang").value;
+      
+      let jumlah =
+      
+      document.getElementById("jumlahbarang").value;
+      
+      if(nama ==="" || jumlah ==="") {
+        alert("isi semua data!");
+        return;
+      }
+      
+      stock.push({
+        nama:nama,
+        jumlah:jumlah
+      });
+      
+      simpanData();
+      tampilkanData();
+      
+      document.getElementById("namabarang").value="";
+      
+      document.getElementById("jumlahbarang").value="";
+      
+    }
+    
+    function tampilkanData (){
+      let tabel =
+      document.getElementById("dataStock");
+      
+      tabel.innerHTML="";
+      
+      stock.forEach((item,index)=>{
+        
+        tabel.innerHTML +=`
+        <tr>
+        <td>${item.nama}</td>
+        <td>${item.jumlah}</td>
+        <td>
+        
+        <button class="edit"
+        onclick="editBarang(${index})">
+        edit
+        </button>
+        
+        <button class="hapus"
+        onclick="hapusBarang(${index})">
+        hapus
+        </button>
+        </td>
+       </tr>
+      `;
+    });
+   }
+     function hapusBarang(index) {
+       
+       stock.splice(index, 1);
+       
+       simpanData();
+       tampilkanData();
+     }
+     
+     function editBarang (index) {
+       
+       let namaBaru = prompt(
+         "Edit Nama Barang:",
+         stock[index].Nama
+         );
+         
+         let jumlahBaru = prompt(
+           "Edit Jumlah Stock:",
+           stock[index].Jumlah
+           );
+           
+           if (namaBaru !== null && jumlahBaru !== null) {
+             
+             stock[index].nama = namaBaru;
+             stock[index].jumlah = jumlahBaru;
+             
+             simpanData();
+             tampilkanData();
+           }
+          }
+          function simpanData() {
+            localStorage.setItem(
+              "stockGudang",
+              JSON.stringify(stock)
+              );
+          }
+    
+  </script>
+  
+</body>
+</html>
