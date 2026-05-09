@@ -5,27 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>STOCK GUDANG</title>
+
   <style>
-    
+
     body {
       font-family: Arial, Sans-Serif;
       background: #f2f2f2;
       padding: 20px;
     }
-    
+
     .container {
       max-width: 600px;
       margin: auto;
       background: white;
       padding: 20px;
       border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0,1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    
+
     h2 {
       text-align: center;
     }
-    
+
     input {
       width: 100%;
       padding: 12px;
@@ -34,7 +35,7 @@
       border-radius: 8px;
       border: 1px solid #ccc;
     }
-    
+
     button {
       width: 100%;
       padding: 12px;
@@ -46,23 +47,23 @@
       font-size: 16px;
       cursor: pointer;
     }
-    
-    button:hover {
+
+    table {
       width: 100%;
       margin-top: 20px;
       border-collapse: collapse;
     }
-    
-    th,td {
+
+    th, td {
       border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
     }
-    
+
     th {
       background: #eee;
     }
-    
+
     .hapus {
       background: red;
       color: white;
@@ -70,8 +71,9 @@
       border-radius: 5px;
       cursor: pointer;
       border: none;
+      margin-top: 5px;
     }
-    
+
     .edit {
       background: orange;
       color: white;
@@ -81,137 +83,210 @@
       border: none;
       margin-top: 5px;
     }
-    
+
   </style>
 </head>
 <body>
-  
+
   <div class="container">
-    <h2>Stock gudang</h2>
-    
-    <input type="text" id="namabarang"
-    placeholder="nama barang">
-    
-    <input type="number" id="jumlahbarang"
-    placeholder="jumlah barang">
-    
+
+    <h2>Stock Gudang</h2>
+
+    <input
+      type="text"
+      id="namabarang"
+      placeholder="Nama barang"
+    >
+
+    <input
+      type="number"
+      id="jumlahbarang"
+      placeholder="Jumlah barang"
+    >
+
     <button onclick="tambahbarang()">
-      tambah barang
+      Tambah Barang
     </button>
-    
+
     <table>
       <thead>
         <tr>
-          <th>barang</th>
-          <th>jumlah</th>
-          <th>aksi</th>
+          <th>Barang</th>
+          <th>Jumlah</th>
+          <th>Aksi</th>
         </tr>
       </thead>
-      
+
       <tbody id="dataStock"></tbody>
     </table>
+
   </div>
-  
-  <script>
-    
-    let stock =
-    JSON.parse(localStorage.getItem("stockGudang")) || [];
-    
-    tampilkanData();
-    
-    function tambahbarang() {
-      let nama=
-      
-      document.getElementById("namabarang").value;
-      
-      let jumlah =
-      
-      document.getElementById("jumlahbarang").value;
-      
-      if(nama ==="" || jumlah ==="") {
-        alert("isi semua data!");
-        return;
+
+  <script type="module">
+
+    import { createClient }
+    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // GANTI DENGAN DATA SUPABASE KAMU
+    const supabaseUrl = 'https://sicvljojspkgnvzdzfsa.supabase.co'
+    const supabaseKey = 'sb_publishable_tzwX2QC5Z6HXgZiKfu_zhA_yH7HpHfF'
+
+    const supabase = createClient(
+      supabaseUrl,
+      supabaseKey
+    )
+
+    let stock = []
+
+    // LOAD DATA AWAL
+    async function loadData() {
+
+      const { data, error } =
+      await supabase
+      .from('stock')
+      .select('*')
+      .order('id', { ascending: true })
+
+      if(error){
+        console.log(error)
+        return
       }
-      
-      stock.push({
-        nama:nama,
-        jumlah:jumlah
-      });
-      
-      simpanData();
-      tampilkanData();
-      
-      document.getElementById("namabarang").value="";
-      
-      document.getElementById("jumlahbarang").value="";
-      
+
+      stock = data
+      tampilkanData()
     }
-    
-    function tampilkanData (){
+
+    loadData()
+
+    // TAMBAH BARANG
+    window.tambahbarang = async function () {
+
+      let nama =
+      document.getElementById("namabarang").value
+
+      let jumlah =
+      document.getElementById("jumlahbarang").value
+
+      if(nama === "" || jumlah === "") {
+        alert("Isi semua data!")
+        return
+      }
+
+      const { error } =
+      await supabase
+      .from('stock')
+      .insert([
+        {
+          nama: nama,
+          jumlah: jumlah
+        }
+      ])
+
+      if(error){
+        console.log(error)
+        alert("Gagal tambah data")
+        return
+      }
+
+      document.getElementById("namabarang").value = ""
+      document.getElementById("jumlahbarang").value = ""
+
+      loadData()
+    }
+
+    // TAMPILKAN DATA
+    function tampilkanData() {
+
       let tabel =
-      document.getElementById("dataStock");
-      
-      tabel.innerHTML="";
-      
-      stock.forEach((item,index)=>{
-        
-        tabel.innerHTML +=`
-        <tr>
-        <td>${item.nama}</td>
-        <td>${item.jumlah}</td>
-        <td>
-        
-        <button class="edit"
-        onclick="editBarang(${index})">
-        edit
-        </button>
-        
-        <button class="hapus"
-        onclick="hapusBarang(${index})">
-        hapus
-        </button>
-        </td>
-       </tr>
-      `;
-    });
-   }
-     function hapusBarang(index) {
-       
-       stock.splice(index, 1);
-       
-       simpanData();
-       tampilkanData();
-     }
-     
-     function editBarang (index) {
-       
-       let namaBaru = prompt(
-         "Edit Nama Barang:",
-         stock[index].Nama
-         );
-         
-         let jumlahBaru = prompt(
-           "Edit Jumlah Stock:",
-           stock[index].Jumlah
-           );
-           
-           if (namaBaru !== null && jumlahBaru !== null) {
-             
-             stock[index].nama = namaBaru;
-             stock[index].jumlah = jumlahBaru;
-             
-             simpanData();
-             tampilkanData();
-           }
-          }
-          function simpanData() {
-            localStorage.setItem(
-              "stockGudang",
-              JSON.stringify(stock)
-              );
-          }
-    
+      document.getElementById("dataStock")
+
+      tabel.innerHTML = ""
+
+      stock.forEach((item) => {
+
+        tabel.innerHTML += `
+          <tr>
+
+            <td>${item.nama}</td>
+
+            <td>${item.jumlah}</td>
+
+            <td>
+
+              <button
+                class="edit"
+                onclick="editBarang(${item.id})">
+                Edit
+              </button>
+
+              <button
+                class="hapus"
+                onclick="hapusBarang(${item.id})">
+                Hapus
+              </button>
+
+            </td>
+
+          </tr>
+        `
+      })
+    }
+
+    // HAPUS DATA
+    window.hapusBarang = async function(id) {
+
+      const { error } =
+      await supabase
+      .from('stock')
+      .delete()
+      .eq('id', id)
+
+      if(error){
+        console.log(error)
+        return
+      }
+
+      loadData()
+    }
+
+    // EDIT DATA
+    window.editBarang = async function(id) {
+
+      let item =
+      stock.find(data => data.id === id)
+
+      let namaBaru = prompt(
+        "Edit Nama Barang:",
+        item.nama
+      )
+
+      let jumlahBaru = prompt(
+        "Edit Jumlah Barang:",
+        item.jumlah
+      )
+
+      if(namaBaru === null || jumlahBaru === null){
+        return
+      }
+
+      const { error } =
+      await supabase
+      .from('stock')
+      .update({
+        nama: namaBaru,
+        jumlah: jumlahBaru
+      })
+      .eq('id', id)
+
+      if(error){
+        console.log(error)
+        return
+      }
+
+      loadData()
+    }
+
   </script>
-  
+
 </body>
 </html>
