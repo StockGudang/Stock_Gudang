@@ -99,6 +99,13 @@
   <div class="container">
 
     <h2>Stock Gudang</h2>
+    <input
+      type="text"
+      id="search"
+      placeholder="Cari Barang..."
+      onkeyup="caribarang()"
+      >
+    
 
     <input
       type="text"
@@ -153,6 +160,7 @@
     )
 
     let stock = []
+    let hasilcari = []
 
     // LOAD DATA AWAL
     async function loadData() {
@@ -169,6 +177,7 @@
       }
 
       stock = data
+      hasilcari = data
       tampilkanData()
     }
 
@@ -224,7 +233,7 @@
 
       tabel.innerHTML = ""
 
-      stock.forEach((item) => {
+      hasilcari.forEach((item) => {
 
         tabel.innerHTML += `
           <tr>
@@ -257,6 +266,18 @@
         `
       })
     }
+    window.caribarang =function() {
+        let keyword =
+        document.getElementById("search").value
+        .toLowerCase()
+        
+        hasilcari = stock.filter((item)=>{
+          return (
+            item.nama.toLowerCase().includes(keyword) || item.satuan.toLowerCase().includes(keyword)
+            )
+        })
+        tampilkanData()
+      }
 
     // HAPUS DATA
     window.hapusBarang = async function(id) {
