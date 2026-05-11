@@ -98,7 +98,7 @@
 
   <div class="container">
 
-    <h2>Stock Gudang</h2>
+    <h2 id="judulHalaman">Stock Gudang</h2>
     <input
       type="text"
       id="search"
@@ -163,9 +163,14 @@
 
     let stock = []
     let hasilcari = []
+    let halamanSekarang = "data"
 
     // LOAD DATA AWAL
     window.loadData = async function loadData() {
+      
+      halamanSekarang="data"
+      
+      document.getElementById("judulHalaman").innerText = "Stock Gudang"
 
       const { data, error } =
       await supabase
@@ -187,6 +192,11 @@
     loadData()
     
     window.lihatSampah = async function() {
+      
+      halamanSekarang="sampah"
+      
+      document.getElementById("judulHalaman").innerText = "Halaman Sampah"
+      
       const {data,error} =
       await supabase
       .from(`stock`)
@@ -309,6 +319,9 @@
             <button
             class="edit"
             onclick="pulihkanBarang(${item.id})">Pulihkan</button>
+            <button
+            class="hapus"
+            onclick="hapusPermanen(${item.id})">Hapus Secara Permanen</button>
            </td>
          </tr>
         `
@@ -325,7 +338,11 @@
             item.nama.toLowerCase().includes(keyword) || item.satuan.toLowerCase().includes(keyword)
             )
         })
+        if (halamanSekarang === "sampah"){
+          tampilkanSampah()
+        }else {
         tampilkanData()
+        }
       }
 
     // HAPUS DATA
@@ -409,6 +426,26 @@
         return
       }
       lihatSampah()
+    }
+    window.hapusPermanen = async function(id) {
+      let yakin = confirm(
+        "data akan dihapus permanen")
+    if (!yakin){
+      return
+    }
+    
+    const {error} =
+    await supabase
+    .from(`stock`)
+    .delete()
+    .eq(`id`, id)
+    
+    if (error){
+      console.log(error)
+      alert("Gagal Hapus Permanen")
+      return
+    }
+    lihatSampah()
     }
     
 
