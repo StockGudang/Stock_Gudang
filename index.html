@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1024">
+  <meta name="viewport" content="width=800">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>STOCK GUDANG</title>
 
@@ -128,6 +128,8 @@
     <button onclick="tambahbarang()">
       Tambah Barang
     </button>
+    <button onclick="lihatSampah()">Lihat Sampah</button>
+    <button onclick="loadData()">Kembali Ke Data</button>
 
     <table>
       <thead>
@@ -163,12 +165,13 @@
     let hasilcari = []
 
     // LOAD DATA AWAL
-    async function loadData() {
+    window.loadData = async function loadData() {
 
       const { data, error } =
       await supabase
       .from('stock')
       .select('*')
+      .eq(`deleted`,false)
       .order('id', { ascending: true })
 
       if(error){
@@ -182,6 +185,24 @@
     }
 
     loadData()
+    
+    window.lihatSampah = async function() {
+      const {data,error} =
+      await supabase
+      .from(`stock`)
+      .select(`*`)
+      .eq(`deleted`, true)
+      .order(`id`, {ascending: true})
+      
+      if (error) {
+        console.log (error)
+        return
+      }
+      
+      stock = data
+      hasilcari = data
+      tampilkanSampah()
+    }
 
     // TAMBAH BARANG
     window.tambahbarang = async function () {
@@ -208,6 +229,7 @@
           nama: nama,
           jumlah: jumlah,
           satuan: satuan,
+          deleted: false,
           updated_at: new
         Date().toLocaleString("id-ID")
         }
@@ -266,6 +288,33 @@
         `
       })
     }
+    
+    function tampilkanSampah() {
+      
+      let tabel =
+      document.getElementById("dataStock")
+      
+      tabel.innerHTML = ""
+      hasilcari.forEach((item) =>{
+        
+        tabel.innerHTML += `
+        <tr>
+          
+          <td>${item.nama}</td>
+          <td>${item.jumlah}</td>
+          <td>${item.satuan}</td>
+          <td>${item.updated_at}</td>
+          
+          <td>
+            <button
+            class="edit"
+            onclick="pulihkanBarang(${item.id})">Pulihkan</button>
+           </td>
+         </tr>
+        `
+      })
+    }
+    
     window.caribarang =function() {
         let keyword =
         document.getElementById("search").value
@@ -285,7 +334,10 @@
       const { error } =
       await supabase
       .from('stock')
-      .delete()
+      .update({
+        deleted: true,
+        deleted_at: new Date().toISOString()
+      })
       .eq('id', id)
 
       if(error){
@@ -340,6 +392,25 @@
 
       loadData()
     }
+    
+    window.pulihkanBarang = async function (id) {
+      
+      const {error} =
+      await supabase
+      .from(`stock`)
+      .update({
+        deleted: false,
+        deleted_at: null
+      })
+      .eq(`id`, id)
+      
+      if(error){
+        console.log(error)
+        return
+      }
+      lihatSampah()
+    }
+    
 
   </script>
 
