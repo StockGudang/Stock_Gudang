@@ -53,6 +53,14 @@
       margin-top: 20px;
       border-collapse: collapse;
     }
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
 
     th, td {
       border: 1px solid #ddd;
@@ -103,6 +111,12 @@
       id="jumlahbarang"
       placeholder="Jumlah barang"
     >
+    <select id="satuan">
+      <option value="">pilih satuan</option>
+      <option value="dus">DUS</option>
+      <option value="pcs">PCS</option>
+      <option value="rtg">RTG</option>
+    </select>
 
     <button onclick="tambahbarang()">
       Tambah Barang
@@ -113,6 +127,8 @@
         <tr>
           <th>Barang</th>
           <th>Jumlah</th>
+          <th>Satuan</th>
+          <th>Terakhir Diubah</th>
           <th>Aksi</th>
         </tr>
       </thead>
@@ -166,8 +182,11 @@
 
       let jumlah =
       document.getElementById("jumlahbarang").value
+      
+      let satuan =
+      document.getElementById("satuan").value
 
-      if(nama === "" || jumlah === "") {
+      if(nama === "" || jumlah === "" || satuan ==="") {
         alert("Isi semua data!")
         return
       }
@@ -178,7 +197,10 @@
       .insert([
         {
           nama: nama,
-          jumlah: jumlah
+          jumlah: jumlah,
+          satuan: satuan,
+          updated_at: new
+        Date().toLocaleString("id-ID")
         }
       ])
 
@@ -210,6 +232,10 @@
             <td>${item.nama}</td>
 
             <td>${item.jumlah}</td>
+            
+            <td>${item.satuan}</td>
+            
+            <td>${item.updated_at}</td>
 
             <td>
 
@@ -264,8 +290,13 @@
         "Edit Jumlah Barang:",
         item.jumlah
       )
+      
+      let satuanBaru = prompt(
+        "Edit satuan Barang:",
+        item.satuan
+        )
 
-      if(namaBaru === null || jumlahBaru === null){
+      if(namaBaru === null || jumlahBaru === null || satuanBaru === null){
         return
       }
 
@@ -274,7 +305,10 @@
       .from('stock')
       .update({
         nama: namaBaru,
-        jumlah: jumlahBaru
+        jumlah: jumlahBaru,
+        satuan: satuanBaru,
+        updated_at: new
+        Date().toLocaleString("id-ID")
       })
       .eq('id', id)
 
